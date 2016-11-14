@@ -116,6 +116,10 @@ func NewRequestOptions(r *http.Request) *RequestOptions {
 // ContextHandler provides an entrypoint into executing graphQL queries with a
 // user-provided context.
 func (h *Handler) ContextHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	h.ContextHandlerWithUserContext(ctx, w, r, nil)
+}
+
+func (h *Handler) ContextHandlerWithUserContext(ctx context.Context, w http.ResponseWriter, r *http.Request, uc interface{}) {
 	// get query
 	opts := NewRequestOptions(r)
 
@@ -126,6 +130,7 @@ func (h *Handler) ContextHandler(ctx context.Context, w http.ResponseWriter, r *
 		VariableValues: opts.Variables,
 		OperationName:  opts.OperationName,
 		Context:        ctx,
+		UserContext:	uc,
 	}
 	result := graphql.Do(params)
 
@@ -146,6 +151,10 @@ func (h *Handler) ContextHandler(ctx context.Context, w http.ResponseWriter, r *
 // ServeHTTP provides an entrypoint into executing graphQL queries.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.ContextHandler(context.Background(), w, r)
+}
+
+func (h *Handler) ServeHTTPWithUserContext(w http.ResponseWriter, r *http.Request, uc interface{}) {
+	h.ContextHandlerWithUserContext(context.Background(), w, r, uc)
 }
 
 type Config struct {
